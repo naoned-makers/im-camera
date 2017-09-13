@@ -1,4 +1,5 @@
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
+import socket
 
 DEFAULT_BROKER_HOSTNAME = "localhost"
 TOPIC_MOVE_NAME = "im/command/head/facetrackmove"
@@ -12,6 +13,8 @@ class CommandRobot(object):
     def __init__(self, hostname = DEFAULT_BROKER_HOSTNAME, topic_name = TOPIC_MOVE_NAME):
         self.hostname = hostname
         self.topic_name = topic_name
+        self.mqtt_client = mqtt.Client(client_id="camera_"+socket.gethostname())
+        self.mqtt_client.connect(hostname, 1883, 60)
 
     def move(self, position):
         """
@@ -19,4 +22,4 @@ class CommandRobot(object):
         """
 
         print "move at {}".format(position)
-        publish.single(self.topic_name, "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position), hostname=self.hostname)
+        self.mqtt_client.publish(self.topic_name, "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position))
