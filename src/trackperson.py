@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+import math
+
+MOVE_MIN_WIDTH_PERCENT=1
 
 def get_center_trackwindow(trackwindow):
     """
@@ -7,7 +10,8 @@ def get_center_trackwindow(trackwindow):
         (xmin, ymin, width, height)
     """
     return (trackwindow[0]+(trackwindow[2]/2),trackwindow[1]+(trackwindow[3]/2))
-    
+
+
 
 class TrackApp(object):
     def __init__(self, ref_img, rect):
@@ -16,6 +20,9 @@ class TrackApp(object):
         self.selection = (xmin, ymin, xmax, ymax)
         self.track_window = (xmin, ymin, xmax - xmin, ymax - ymin)
         self.center = get_center_trackwindow(self.track_window)
+        self.current_position=self.center[0]
+        self.last_move_position=self.current_position
+        self.ref_img_width=ref_img.shape[1]
         
         hsv = cv2.cvtColor(ref_img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.)))   
@@ -62,3 +69,19 @@ class TrackApp(object):
         
         self.center=get_center_trackwindow(self.track_window)
         cv2.circle(new_img,self.center, 10, (0,0,255), -1)
+
+        self.current_position=self.center[0]
+
+    def set_last_move_position_as_current(self):
+        self.last_move_position=self.current_position
+
+    def get_last_move_in_percent(self):
+        """
+            return the move value (as an int) as percent of the img width
+        """
+        return  int(self.last_move_position*100/self.ref_img_width)
+                    
+
+    def is_enougth_move(self):
+        current_position_in_percent=int(self.current_position*100/self.ref_img_width)
+        return math.fabs(self.get_last_move_in_percent()-current_position_in_percent) > MOVE_MIN_WIDTH_PERCENT
