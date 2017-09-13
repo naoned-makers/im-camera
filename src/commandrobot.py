@@ -1,14 +1,22 @@
 import paho.mqtt.publish as publish
 
+DEFAULT_BROKER_HOSTNAME = "localhost"
+TOPIC_MOVE_NAME = "im/command/head/facetrackmove"
 
-def stop_command():
-    print("stop move")
 
-def start_command(position):
-    #todo : start move
-    print "start moving at {}".format(position)
-    publish.single("im/command/head/facetrackmove", "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position), hostname="localhost")
+class CommandRobot(object):
+    """
+        Launch command to the broker
+    """
 
-def move(position):
-    print "move at {}".format(position)
-    publish.single("im/command/head/facetrackmove", "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position), hostname="localhost")
+    def __init__(self, hostname = DEFAULT_BROKER_HOSTNAME, topic_name = TOPIC_MOVE_NAME):
+        self.hostname = hostname
+        self.topic_name = topic_name
+
+    def move(self, position):
+        """
+            Method to publish a move event to the broker
+        """
+
+        print "move at {}".format(position)
+        publish.single(self.topic_name, "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position), hostname=self.hostname)

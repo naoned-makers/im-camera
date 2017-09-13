@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
     Main module of the camera feature
 """
@@ -5,19 +7,40 @@ import facedetect as fd
 import trackperson as tp
 import commandrobot as cr
 import cv2
+import sys, getopt
 
 
 MIN_TRACKING_SIZE = 35
 
 
-def main():
+def main(argv):
     """
         Main function that do the OpenCV loop on the camera images stream
+
+        parameters
+        -------------------
+        argv : should contains parameters to configure the broker
+                -h : the hostname
+                -t : the topic name
     """
 
     camera = cv2.VideoCapture(0)
     cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
     tracker = None
+    robot = cr.CommandRobot()
+
+    #Read the parameters
+    try:
+        opts, args = getopt.getopt(argv,"ht",["hostname=","topic="])
+    except getopt.GetoptError:
+        print 'main.py -h <hostname> -t <topic>'
+        sys.exit(2)
+
+    for opt, arg in opts:
+      if opt in ("-h", "--hostanme"):
+         robot.hostname = arg
+      elif opt in ("-t", "--topic"):
+         robot.topic_name = arg
 
     while True:
         ret, img = camera.read()
@@ -34,7 +57,7 @@ def main():
             tracker = tp.TrackApp(img,rects[0])
 
             #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-            cr.start_command(100-tracker.get_last_move_in_percent())
+            robot.move(100-tracker.get_last_move_in_percent())
 
         # A tracker is following
         if tracker:
@@ -47,7 +70,7 @@ def main():
                     tracker.set_last_move_position_as_current()
 
                     #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                    cr.move(100-tracker.get_last_move_in_percent())
+                    robot.move(100-tracker.get_last_move_in_percent())
                 
             else:
                 print "Stop tracking at {}".format(tracker.selection)
@@ -58,4 +81,4 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
