@@ -14,7 +14,7 @@ def get_center_trackwindow(trackwindow):
 
 
 class TrackApp(object):
-    def __init__(self, ref_img, rect):
+    def __init__(self, ref_img, rect, headless = False):
         xmin, ymin, xmax, ymax = rect[0], rect[1], rect[2], rect[3]
 
         self.selection = (xmin, ymin, xmax, ymax)
@@ -23,6 +23,7 @@ class TrackApp(object):
         self.current_position=self.center[0]
         self.last_move_position=self.current_position
         self.ref_img_width=ref_img.shape[1]
+        self.headless = headless
         
         hsv = cv2.cvtColor(ref_img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.)))   
@@ -45,7 +46,10 @@ class TrackApp(object):
         img = np.zeros((256, bin_count*bin_w, 3), np.uint8)
         for i in xrange(bin_count):
             h = int(self.hist[i])
-            cv2.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
+
+            if not self.headless:
+                cv2.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
+        
         img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     def is_not_too_small(self,size):
@@ -63,12 +67,15 @@ class TrackApp(object):
         track_box, self.track_window = cv2.CamShift(prob, self.track_window, term_crit)    
         
         try:
-            cv2.ellipse(new_img, track_box, (0, 0, 255), 2)
+            if not self.headless :
+                cv2.ellipse(new_img, track_box, (0, 0, 255), 2)
         except:
            print(track_box)
         
         self.center=get_center_trackwindow(self.track_window)
-        cv2.circle(new_img,self.center, 10, (0,0,255), -1)
+
+        if not self.headless :
+            cv2.circle(new_img,self.center, 10, (0,0,255), -1)
 
         self.current_position=self.center[0]
 

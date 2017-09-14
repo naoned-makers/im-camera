@@ -20,7 +20,7 @@ def draw_rects(img, rects, color):
 
 
 # Global function to detect all faces in a image
-def detect_faces(img):
+def detect_faces(img, headless = False):
     """
         Detects all the faces in the current img
         return an array of the rectangles surrounding the detected faces
@@ -30,6 +30,8 @@ def detect_faces(img):
     gray = cv2.equalizeHist(gray)
 
     rects = detect(gray, face_cascade)
-    draw_rects(img, rects, (0, 255, 0))
+
+    if not headless:
+        draw_rects(img, rects, (0, 255, 0))
     
     return rects
