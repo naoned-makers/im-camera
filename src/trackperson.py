@@ -37,7 +37,7 @@ class TrackApp(object):
         
         vis_roi = ref_img[y0:y1, x0:x1]
         cv2.bitwise_not(vis_roi, vis_roi)
-        ref_img[mask == 0] = 0
+        #ref_img[mask == 0] = 0
 
 
     def show_hist(self, img):
@@ -75,7 +75,7 @@ class TrackApp(object):
         self.center=get_center_trackwindow(self.track_window)
 
         if not self.headless :
-            cv2.circle(new_img,self.center, 10, (0,0,255), -1)
+            cv2.circle(new_img,(int(self.center[0]),int(self.center[1])), 10, (0,0,255), -1)
 
         self.current_position=self.center[0]
 
