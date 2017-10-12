@@ -30,6 +30,8 @@ def main(argv):
     #Read the parameters
     tracker = None
     headless = False
+    robot = cr.CommandRobot()
+
     
     try:
         opts, args = getopt.getopt(argv,"htd",["hostname=","topic=", "headless"])
@@ -49,7 +51,6 @@ def main(argv):
     camera.resolution = (640,480)
     camera.framerate = 32
     
-    robot = cr.CommandRobot()
     rawCapture = PiRGBArray(camera, size=(640,480))
     
     time.sleep(0.1)
