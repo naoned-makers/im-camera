@@ -9,7 +9,9 @@ import facedetect as fd
 import trackperson as tp
 import commandrobot as cr
 import cv2
-
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+import time
 
 MIN_TRACKING_SIZE = 35
 
@@ -24,16 +26,15 @@ def main(argv):
                 -t : the topic name
                 -d : headless
     """
-    robot = cr.CommandRobot()
-    camera = cv2.VideoCapture(0)
+    
+    #Read the parameters
     tracker = None
     headless = False
-
-    #Read the parameters
+    
     try:
         opts, args = getopt.getopt(argv,"htd",["hostname=","topic=", "headless"])
     except getopt.GetoptError:
-        print 'main.py -h <hostname> -t <topic> -d'
+        print ('main.py -h <hostname> -t <topic> -d')
         sys.exit(2)
 
     for opt, arg in opts:
@@ -44,32 +45,38 @@ def main(argv):
       elif opt in ("-d", "--headless"):
          headless = True
 
+    camera = PiCamera()
+    camera.resolution = (640,480)
+    camera.framerate = 32
+    
+    robot = cr.CommandRobot()
+    rawCapture = PiRGBArray(camera, size=(640,480))
+    
+    time.sleep(0.1)
     
     if not headless:
         cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
 
     nb_ignored_img=0
     
-
-    while True:
-        ret, img = camera.read()
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        img = frame.array
 
         key = cv2.waitKey(10)
         
         if key==27:
             break
 
-        if not tracker :
+        if not tracker:         
             rects = fd.detect_faces(img, headless)
-
 
             # A face was detected and the tracker is Not following
             if len(rects) > 0 and tracker is None:
-                print "Start tracking at {}".format(rects[0])
+                print ("Start tracking at {}".format(rects[0]))
                 tracker = tp.TrackApp(img,rects[0], headless)
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                robot.move(100-tracker.get_last_move_in_percent())
+                robot.move(tracker.get_last_move_in_percent())
 
         # A tracker is following but shouldn't be too small
         elif tracker.is_not_too_small(MIN_TRACKING_SIZE):
@@ -80,15 +87,17 @@ def main(argv):
                 tracker.set_last_move_position_as_current()
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                robot.move(100-tracker.get_last_move_in_percent())        
+                robot.move(tracker.get_last_move_in_percent())        
         else:
-            print "Stop tracking at {}".format(tracker.selection)
+            print ("Stop tracking at {}".format(tracker.selection))
             tracker=None
 
         if not headless:
             cv2.imshow('IronMan-View', img)  
 
-    cv2.destroyAllWindows()
+        rawCapture.truncate(0)
+
+cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -21,5 +21,5 @@ class CommandRobot(object):
             Method to publish a move event to the broker
         """
 
-        print "move at {}".format(position)
+        print ("move at {}".format(position))
         self.mqtt_client.publish(self.topic_name, "{{\"origin\":\"camera\",\"absPosition\":{0}}}".format(position))
