@@ -95,7 +95,8 @@ def main(argv):
 
         if not headless:
             cv2.imshow('IronMan-View', img)  
-
+        else:
+            cv2.imwrite('/tmp/camera-out.jpg', img)
         rawCapture.truncate(0)
 
 cv2.destroyAllWindows()
