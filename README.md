@@ -16,7 +16,21 @@ fi
 exit
 ```
 
-# install required dependencies
+# L'installation de base
+
+1. Python-opencv
+
+```shell
+$ sudo apt-get install python-opencv
+```
+
+2. Et piCamera
+ 
+```shell
+$ sudo pip install picamera
+```
+
+# Hot compile Installation
 
 (for RPI3 with Raspbian Jessie)
 
@@ -89,6 +103,7 @@ $ cd build
 $ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.3.0/modules \
+    -DBUILD_PYTHON2=ON \
     ..
 $ make -j4
 $ sudo make install
@@ -101,12 +116,8 @@ $ sudo ldconfig
 $ python
 >>> import cv2
 >>> cv2.__version__
-'3.1.0'
+'3.3.0'
 >>>
 ```
 
-# Si ça ne marche pas un peu de chance...
 
-```shell
-$ sudo apt-get install python-opencv
-```
