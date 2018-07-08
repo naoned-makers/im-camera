@@ -105,6 +105,18 @@ $ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.3.0/modules \
     -DBUILD_PYTHON2=ON \
     ..
+# Mac example
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D OPENCV_EXTRA_MODULES_PATH=/Users/rguillome/Documents/code/opencv_contrib/modules \
+    -D PYTHON2_LIBRARY=/usr/local/Cellar/python@2/2.7.14_1/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+    -D PYTHON2_INCLUDE_DIR=/usr/local/Cellar/python@2/2.7.14_1/Frameworks/Python.framework/Versions/2.7/include/python2.7 \
+    -D BUILD_opencv_python2=ON \
+    -D BUILD_opencv_python3=OFF \
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D INSTALL_C_EXAMPLES=OFF \
+    -D BUILD_EXAMPLES=OFF ..
+
 $ make -j4
 $ sudo make install
 $ sudo ldconfig
