@@ -31,7 +31,7 @@ def main(argv):
     headless = False
     platform = PLATFORM_RPI
     camera = None
-    hostname = None
+    hostname = "localhost" 
 
   
     try:
@@ -53,7 +53,7 @@ def main(argv):
 
     if platform == PLATFORM_RPI:
         import picapture as cp
-        camera = cp.PiCamera()
+        camera = cp.PiCapture()
     elif platform == PLATFORM_WEBCAM:
         import webcamcapture as wp
         camera = wp.WebcamCapture()

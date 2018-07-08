@@ -9,7 +9,7 @@ class PiCapture(object):
         self.camera.resolution = (640,480)
         self.camera.framerate = 32
         
-        self.rawCapture = PiRGBArray(camera, size=(640,480))
+        self.rawCapture = PiRGBArray(self.camera, size=(640,480))
     
         time.sleep(0.1)
 
@@ -20,4 +20,3 @@ class PiCapture(object):
     
     def clean_iteration(self):
         self.rawCapture.truncate(0)
-
