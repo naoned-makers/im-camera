@@ -9,11 +9,10 @@ import facedetect as fd
 import trackperson as tp
 import commandrobot as cr
 import cv2
-from picamera import PiCamera
-from picamera.array import PiRGBArray
-import time
 
 MIN_TRACKING_SIZE = 35
+PLATFORM_RPI = 'rpi'
+PLATFORM_WEBCAM = 'webcam'
 
 def main(argv):
     """
@@ -23,45 +22,48 @@ def main(argv):
         -------------------
         argv : should contains parameters to configure the broker
                 -h : the hostname
-                -t : the topic name
+                -p : the platform (rpi or webcam)
                 -d : headless
     """
     
     #Read the parameters
     tracker = None
     headless = False
-    robot = cr.CommandRobot()
+    platform = PLATFORM_RPI
+    camera = None
+    hostname = None
 
   
     try:
-        opts, args = getopt.getopt(argv,"htd",["hostname=","topic=", "headless"])
+        opts, args = getopt.getopt(argv,"h:p:d",["hostname=","platform="])
     except getopt.GetoptError:
-        print ('main.py -h <hostname> -t <topic> -d')
+        print ('main.py -h <hostname> -p <platform> -d')
         sys.exit(2)
 
     for opt, arg in opts:
-      if opt in ("-h", "--hostanme"):
-         robot.hostname = arg
-      elif opt in ("-t", "--topic"):
-         robot.topic_name = arg
-      elif opt in ("-d", "--headless"):
-         headless = True
+      if opt in ("-h", "--hostname"):
+        hostname = arg
+      elif opt in ("-p", "--platform"):
+        platform = arg
+      elif opt == "-d":
+        headless = True
 
-    camera = PiCamera()
-    camera.resolution = (640,480)
-    camera.framerate = 32
-    
-    rawCapture = PiRGBArray(camera, size=(640,480))
-    
-    time.sleep(0.1)
-    
+    robot = cr.CommandRobot(hostname)
+    camera = None
+
+    if platform == PLATFORM_RPI:
+        import picapture as cp
+        camera = cp.PiCamera()
+    elif platform == PLATFORM_WEBCAM:
+        import webcamcapture as wp
+        camera = wp.WebcamCapture()
+
     if not headless:
         cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
 
     nb_ignored_img=0
     
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        img = frame.array
+    for img in camera.next_img():
 
         key = cv2.waitKey(10)
         
@@ -74,6 +76,7 @@ def main(argv):
             # A face was detected and the tracker is Not following
             if len(rects) > 0 and tracker is None:
                 print ("Start tracking at {}".format(rects[0]))
+                robot.post_photo(img)
                 tracker = tp.TrackApp(img,rects[0], headless)
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
@@ -97,7 +100,8 @@ def main(argv):
             cv2.imshow('IronMan-View', img)  
         else:
             cv2.imwrite('/tmp/camera-out.jpg', img)
-        rawCapture.truncate(0)
+
+        camera.clean_iteration()
 
 cv2.destroyAllWindows()
 
