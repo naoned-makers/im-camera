@@ -30,4 +30,7 @@ class CommandRobot(object):
         """
 
         print("take photo !!!")
-        self.mqtt_client.publish(TOPIC_START_NAME, "{{\"origin\":\"camera\",\"face\":{0}}}".format(base64.b64encode(img)))
+        b64img=base64.b64encode(img)
+        #b64img=b64img.decode("utf-8")
+        print("photo b64: {}".format(b64img)) 
+        self.mqtt_client.publish(TOPIC_START_NAME, "{{\"origin\":\"camera\",\"face\":\"{0}\"}}".format(b64img))
