@@ -30,7 +30,12 @@ class CommandRobot(object):
         """
 
         print("take photo !!!")
+        
+
         b64img=base64.b64encode(img)
-        #b64img=b64img.decode("utf-8")
-        print("photo b64: {}".format(b64img)) 
-        self.mqtt_client.publish(TOPIC_START_NAME, "{{\"origin\":\"camera\",\"face\":\"{0}\"}}".format(b64img))
+        str_encoded=str(b64img,'utf-8')
+
+        with open("test_encoded.txt", "w") as text_file:
+            text_file.write(str_encoded)
+        
+        self.mqtt_client.publish(TOPIC_START_NAME, "{{\"origin\":\"camera\",\"face\":\"{0}\"}}".format(str_encoded))

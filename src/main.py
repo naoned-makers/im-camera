@@ -74,9 +74,11 @@ def main(argv):
             rects = fd.detect_faces(img, headless)
 
             # A face was detected and the tracker is Not following
-            if len(rects) > 0 and tracker is None:
+            if len(rects) > 0 and tracker is None:  
                 print ("Start tracking at {}".format(rects[0]))
-                robot.post_photo(img)
+                #croped_img=crop_img = img[rects[0][1]:rects[0][3], rects[0][0]:rects[0][2]]
+                img_str = cv2.imencode('.jpg', img)[1].tostring()
+                robot.post_photo(img_str)
                 tracker = tp.TrackApp(img,rects[0], headless)
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
