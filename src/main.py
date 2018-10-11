@@ -8,6 +8,7 @@ import getopt
 import facedetect as fd
 import trackperson as tp
 import commandrobot as cr
+import transformimage as ti
 import cv2
 
 MIN_TRACKING_SIZE = 35
@@ -77,7 +78,8 @@ def main(argv):
             if len(rects) > 0 and tracker is None:  
                 print ("Start tracking at {}".format(rects[0]))
                 #croped_img=crop_img = img[rects[0][1]:rects[0][3], rects[0][0]:rects[0][2]]
-                img_str = cv2.imencode('.jpg', img)[1].tostring()
+                img_transformed = ti.transform_image(img)
+                img_str = cv2.imencode('.jpg', img_transformed)[1].tostring()
                 robot.post_photo(img_str)
                 tracker = tp.TrackApp(img,rects[0], headless)
 
