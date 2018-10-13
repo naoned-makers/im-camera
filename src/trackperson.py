@@ -24,7 +24,7 @@ class TrackApp(object):
         self.last_move_position=self.current_position
         self.ref_img_width=ref_img.shape[1]
         self.headless = headless
-        
+         
         hsv = cv2.cvtColor(ref_img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, np.array((0., 60., 32.)), np.array((180., 255., 255.)))   
 

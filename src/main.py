@@ -14,6 +14,7 @@ import cv2
 MIN_TRACKING_SIZE = 35
 PLATFORM_RPI = 'rpi'
 PLATFORM_WEBCAM = 'webcam'
+MAX_NB_IMG_STOP = 100
 
 def main(argv):
     """
@@ -63,7 +64,8 @@ def main(argv):
         cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
 
     nb_ignored_img=0
-    
+    nb_img_stop=0
+
     for img in camera.next_img():
 
         key = cv2.waitKey(10)
@@ -78,9 +80,10 @@ def main(argv):
             if len(rects) > 0 and tracker is None:  
                 print ("Start tracking at {}".format(rects[0]))
                 #croped_img=crop_img = img[rects[0][1]:rects[0][3], rects[0][0]:rects[0][2]]
-                img_transformed = ti.transform_image(img)
-                img_str = cv2.imencode('.jpg', img_transformed)[1].tostring()
-                robot.post_photo(img_str)
+                #img_transformed = ti.transform_image(img)
+                #img_transformed=img	
+                #img_str = cv2.imencode('.jpg', img_transformed)[1].tostring()
+                #robot.post_photo(img_str)
                 tracker = tp.TrackApp(img,rects[0], headless)
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
@@ -95,7 +98,15 @@ def main(argv):
                 tracker.set_last_move_position_as_current()
 
                 #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                robot.move(tracker.get_last_move_in_percent())        
+                robot.move(tracker.get_last_move_in_percent())
+                
+                nb_img_stop = 0
+            elif nb_img_stop == MAX_NB_IMG_STOP:
+                print("Stop tracking because camera is waiting too long time")
+                tracker=None
+                nb_img_stop = 0
+            else:
+                nb_img_stop += 1        
         else:
             print ("Stop tracking at {}".format(tracker.selection))
             tracker=None
