@@ -1,7 +1,7 @@
 import cv2
 
 # Initialize the face detection algorithme with configuration to detect frontal face
-face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_alt2.xml')
 
 # Detect all faces in the current image with an opencv cascade algorithme  
 # return an array of rects

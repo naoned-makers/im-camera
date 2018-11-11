@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+import facedetect as fd
 
 MOVE_MIN_WIDTH_PERCENT=1
 
@@ -37,7 +38,6 @@ class TrackApp(object):
         
         vis_roi = ref_img[y0:y1, x0:x1]
         cv2.bitwise_not(vis_roi, vis_roi)
-        #ref_img[mask == 0] = 0
 
 
     def show_hist(self, img):
@@ -78,6 +78,8 @@ class TrackApp(object):
             cv2.circle(new_img,(int(self.center[0]),int(self.center[1])), 10, (0,0,255), -1)
 
         self.current_position=self.center[0]
+        rect = cv2.boundingRect(track_box)
+        self.current_face=new_img[rect.x:rect.x+rect.width,rect.y:rect.height]
 
     def set_last_move_position_as_current(self):
         self.last_move_position=self.current_position
@@ -92,3 +94,8 @@ class TrackApp(object):
     def is_enougth_move(self):
         current_position_in_percent=int(self.current_position*100/self.ref_img_width)
         return math.fabs(self.get_last_move_in_percent()-current_position_in_percent) > MOVE_MIN_WIDTH_PERCENT
+
+    def is_always_face(self):
+        #crop img
+        rects = fd.detect_faces(self.current_face, self.headless)
+        return len(rects) > 0

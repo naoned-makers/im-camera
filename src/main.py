@@ -14,7 +14,9 @@ import cv2
 MIN_TRACKING_SIZE = 35
 PLATFORM_RPI = 'rpi'
 PLATFORM_WEBCAM = 'webcam'
+PLATFORM_VIDEO = 'video'
 MAX_NB_IMG_STOP = 100
+MAX_NB_IMG_BEFORE_RECHECK = 100
 
 def main(argv):
     """
@@ -23,8 +25,9 @@ def main(argv):
         parameters
         -------------------
         argv : should contains parameters to configure the broker
-                -h : the hostname
-                -p : the platform (rpi or webcam)
+                -p : the platform (rpi, webcam, video)
+                -v : video path
+                -b : broker hostname
                 -d : headless
     """
     
@@ -32,48 +35,54 @@ def main(argv):
     tracker = None
     headless = False
     platform = PLATFORM_RPI
-    camera = None
-    hostname = "localhost" 
+    hostname = None
+    video_path = None
 
   
     try:
-        opts, args = getopt.getopt(argv,"h:p:d",["hostname=","platform="])
+        opts, args = getopt.getopt(argv,"p:v:b:d",["video_path=","broker_hostname=","platform="])
     except getopt.GetoptError:
-        print ('main.py -h <hostname> -p <platform> -d')
+        print ('main.py -p <platform> -v <video_path> -b <broker_hostname> -d')
         sys.exit(2)
 
     for opt, arg in opts:
-      if opt in ("-h", "--hostname"):
+      if opt in ("-b", "--broker_hostname"):
         hostname = arg
       elif opt in ("-p", "--platform"):
         platform = arg
+      elif opt in ("-v", "--video_path"):
+        video_path = arg
       elif opt == "-d":
         headless = True
 
     robot = cr.CommandRobot(hostname)
-    camera = None
+    source = None
 
     if platform == PLATFORM_RPI:
         import picapture as cp
-        camera = cp.PiCapture()
+        source = cp.PiCapture()
     elif platform == PLATFORM_WEBCAM:
         import webcamcapture as wp
-        camera = wp.WebcamCapture()
+        source = wp.WebcamCapture()
+    elif platform == PLATFORM_VIDEO:
+        import videocapture as vp
+        source = vp.VideoCapture(video_path)
+
 
     if not headless:
         cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
 
-    nb_ignored_img=0
+    nb_ignored_recheck_img=0
     nb_img_stop=0
 
-    for img in camera.next_img():
+    for img in source.next_img():
 
         key = cv2.waitKey(10)
         
         if key==27:
             break
 
-        if not tracker:         
+        if not tracker:
             rects = fd.detect_faces(img, headless)
 
             # A face was detected and the tracker is Not following
@@ -93,14 +102,21 @@ def main(argv):
         elif tracker.is_not_too_small(MIN_TRACKING_SIZE):
             tracker.run(img)
 
+            
             #if move is enough significant, move the head to the current tracked face position (pos or neg move)
             if tracker.is_enougth_move():
-                tracker.set_last_move_position_as_current()
 
-                #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                robot.move(tracker.get_last_move_in_percent())
+                #if max nb img before recheck is hitten, send a face detect 
+                if tracker.is_always_face():
+                    tracker.set_last_move_position_as_current()
+
+                    #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
+                    robot.move(tracker.get_last_move_in_percent())
+
+                    nb_img_stop = 0
+                else :
+                    tracker=None
                 
-                nb_img_stop = 0
             elif nb_img_stop == MAX_NB_IMG_STOP:
                 print("Stop tracking because camera is waiting too long time")
                 tracker=None
@@ -116,9 +132,10 @@ def main(argv):
         else:
             cv2.imwrite('/tmp/camera-out.jpg', img)
 
-        camera.clean_iteration()
+        source.clean_iteration()
 
-cv2.destroyAllWindows()
+    source.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
