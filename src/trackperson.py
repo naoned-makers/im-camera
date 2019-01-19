@@ -47,8 +47,8 @@ class TrackApp(object):
         for i in xrange(bin_count):
             h = int(self.hist[i])
 
-            if not self.headless:
-                cv2.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
+        
+        cv2.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
         
         img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
@@ -66,16 +66,15 @@ class TrackApp(object):
         
         track_box, self.track_window = cv2.CamShift(prob, self.track_window, term_crit)    
         
-        try:
-            if not self.headless :
-                cv2.ellipse(new_img, track_box, (0, 0, 255), 2)
+        try: 
+           cv2.ellipse(new_img, track_box, (0, 0, 255), 2)
         except:
            print(track_box)
         
         self.center=get_center_trackwindow(self.track_window)
 
-        if not self.headless :
-            cv2.circle(new_img,(int(self.center[0]),int(self.center[1])), 10, (0,0,255), -1)
+       
+        cv2.circle(new_img,(int(self.center[0]),int(self.center[1])), 10, (0,0,255), -1)
 
         self.current_position=self.center[0]
         rect = cv2.boundingRect(track_box)
