@@ -9,7 +9,7 @@ def __apply_custom_colormap(im_gray):
 
     rgb = scmi.imread(JARVIS_IMG_PATH)
     
-
+    #print("longueur"+str(len(rgb)))
     lut = np.zeros((256, 1, 3), dtype=np.uint8)
     lut[:, 0, 0] = rgb[1,:,2]
     lut[:, 0, 1] = rgb[1,:,1]
