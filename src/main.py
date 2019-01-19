@@ -10,6 +10,7 @@ import trackperson as tp
 import commandrobot as cr
 import transformimage as ti
 import cv2
+import numpy as np
 
 MIN_TRACKING_SIZE = 35
 PLATFORM_RPI = 'rpi'
@@ -37,6 +38,7 @@ def main(argv):
     platform = PLATFORM_RPI
     hostname = None
     video_path = None
+    robot = None
 
   
     try:
@@ -55,7 +57,6 @@ def main(argv):
       elif opt == "-d":
         headless = True
 
-    robot = cr.CommandRobot(hostname)
     source = None
 
     if platform == PLATFORM_RPI:
@@ -68,7 +69,9 @@ def main(argv):
         import videocapture as vp
         source = vp.VideoCapture(video_path)
 
-
+    if hostname :
+        robot = cr.CommandRobot(hostname)
+    
     if not headless:
         cv2.namedWindow("IronMan-View",cv2.WINDOW_NORMAL)
 
@@ -95,8 +98,9 @@ def main(argv):
                 #robot.post_photo(img_str)
                 tracker = tp.TrackApp(img,rects[0], headless)
 
-                #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                robot.move(tracker.get_last_move_in_percent())
+                if robot:
+                    #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
+                    robot.move(tracker.get_last_move_in_percent())
 
         # A tracker is following but shouldn't be too small
         elif tracker.is_not_too_small(MIN_TRACKING_SIZE):
@@ -111,7 +115,8 @@ def main(argv):
                     tracker.set_last_move_position_as_current()
 
                     #Substract last move percent value to 100% to do the mirrored action (person is in front of the head)
-                    robot.move(tracker.get_last_move_in_percent())
+                    if robot:
+                        robot.move(tracker.get_last_move_in_percent())
 
                     nb_img_stop = 0
                 else :
@@ -127,7 +132,7 @@ def main(argv):
             print ("Stop tracking at {}".format(tracker.selection))
             tracker=None
 
-        if not headless:
+        if not headless and type(img) == np.ndarray and (np.size(img, 0) > 0,np.size(img, 1) > 0):
             cv2.imshow('IronMan-View', img)  
         else:
             cv2.imwrite('/tmp/camera-out.jpg', img)

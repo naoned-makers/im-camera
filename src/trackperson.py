@@ -47,7 +47,6 @@ class TrackApp(object):
         for i in xrange(bin_count):
             h = int(self.hist[i])
 
-        
         cv2.rectangle(img, (i*bin_w+2, 255), ((i+1)*bin_w-2, 255-h), (int(180.0*i/bin_count), 255, 255), -1)
         
         img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
@@ -73,12 +72,16 @@ class TrackApp(object):
         
         self.center=get_center_trackwindow(self.track_window)
 
-       
         cv2.circle(new_img,(int(self.center[0]),int(self.center[1])), 10, (0,0,255), -1)
 
         self.current_position=self.center[0]
-        rect = cv2.boundingRect(track_box)
-        self.current_face=new_img[rect.x:rect.x+rect.width,rect.y:rect.height]
+        #print(self.track_window)
+        #rect = cv2.boxPoints(track_box)
+        #rect = np.int0(rect)
+        (x0,y0,width,height) = (self.track_window[0],self.track_window[1],self.track_window[2],self.track_window[3])
+        #print(rect)
+        print("{0},{1} - {2},{3}".format(x0,width,y0,height))
+        self.current_face=new_img[x0:x0+width,y0:y0+height]
 
     def set_last_move_position_as_current(self):
         self.last_move_position=self.current_position

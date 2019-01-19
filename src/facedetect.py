@@ -25,13 +25,18 @@ def detect_faces(img, headless = False):
         Detects all the faces in the current img
         return an array of the rectangles surrounding the detected faces
     """
+    rects = []
+    
+    try:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.equalizeHist(gray)
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.equalizeHist(gray)
+        rects = detect(gray, face_cascade)
 
-    rects = detect(gray, face_cascade)
-
-    if not headless:
-        draw_rects(img, rects, (0, 255, 0))
+        if not headless:
+            draw_rects(img, rects, (0, 255, 0))
+        
+    except Exception: 
+        pass
     
     return rects
