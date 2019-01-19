@@ -40,7 +40,7 @@ def main(argv):
 
   
     try:
-        opts, args = getopt.getopt(argv,"p:v:b:d",["video_path=","broker_hostname=","platform="])
+        opts, args = getopt.getopt(argv,"p:v:b:d",["platform=","video_path=","broker_hostname="])
     except getopt.GetoptError:
         print ('main.py -p <platform> -v <video_path> -b <broker_hostname> -d')
         sys.exit(2)
