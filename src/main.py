@@ -136,6 +136,7 @@ def main(argv):
 
     source.release()
     cv2.destroyAllWindows()
+    robot.close()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

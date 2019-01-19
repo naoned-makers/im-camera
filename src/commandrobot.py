@@ -17,6 +17,11 @@ class CommandRobot(object):
             print ("trying to connect with {}".format(hostname))
             self.mqtt_client = mqtt.Client(client_id="camera_"+socket.gethostname())
             self.mqtt_client.connect(hostname, 1883, 60)
+            self.mqtt_client.loop_start()
+
+    def close(self):
+        print ("End connection with broker")
+        self.mqtt_client.loop_stop()
 
     def move(self, position):
         """
