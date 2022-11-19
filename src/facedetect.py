@@ -2,6 +2,7 @@ import cv2
 
 # Initialize the face detection algorithme with configuration to detect frontal face
 face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_alt2.xml')
+profil_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_profileface.xml')
 
 # Detect all faces in the current image with an opencv cascade algorithme  
 # return an array of rects
@@ -9,7 +10,11 @@ def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
                                      flags=cv2.CASCADE_SCALE_IMAGE)
     if len(rects) == 0:
-        return []
+        rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, 
+            minSize=(30,30), flasgs=cv2.CASCADE_SCALE_IMAGE)
+
+        if len(rects) == 0:
+           return []
     rects[:,2:] += rects[:,:2]
     return rects
 

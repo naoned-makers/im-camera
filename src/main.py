@@ -34,15 +34,15 @@ def main(argv):
     
     #Read the parameters
     tracker = None
-    headless = False
+    headless = True
     platform = PLATFORM_RPI
-    hostname = None
+    hostname = 'localhost'
     video_path = None
     robot = None
 
-  
+    print('Parameter are: ',argv)	  
     try:
-        opts, args = getopt.getopt(argv,"p:v:b:d",["platform=","video_path=","broker_hostname="])
+        opts, args = getopt.getopt(argv,":p:v:b:d",["platform=","video_path=","broker_hostname="])
     except getopt.GetoptError:
         print ('main.py -p <platform> -v <video_path> -b <broker_hostname> -d')
         sys.exit(2)
